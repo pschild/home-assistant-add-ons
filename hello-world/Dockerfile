@@ -4,7 +4,7 @@ FROM $BUILD_FROM
 # Install requirements for add-on
 RUN \
   apk add --no-cache --update \
-    node \
+    nodejs \
     npm
 
 # Python 3 HTTP Server serves the current working dir
