@@ -1,6 +1,6 @@
 name: "Hello world"
 description: "My first real add-on!"
-version: "0.0.1"
+version: "0.0.2"
 slug: "hello_world"
 init: false
 arch:
