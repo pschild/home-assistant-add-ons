@@ -14,4 +14,4 @@ WORKDIR /data
 # Copy data for add-on
 COPY server.js /
 
-CMD [ "node", "server.js" ]
+CMD [ "node", "/server.js" ]
