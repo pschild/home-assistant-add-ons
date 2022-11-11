@@ -9,8 +9,8 @@ RUN \
     npm
 
 RUN adduser -s /bin/bash -S pschild
-USER pschild
 RUN chown pschild /home/pschild/data
+USER pschild
 
 WORKDIR /home/pschild/data
 
