@@ -48,7 +48,7 @@ const parseDistance = (text) => {
   }
 }
 
-export async function run() {
+async function run() {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto('https://www.google.de/maps/dir/51.5045685,6.9971393/51.668189,6.148282/data=!3m1!4b1!4m2!4m1!3e0');
@@ -83,3 +83,7 @@ export async function run() {
   await browser.close();
 }
 run();
+
+module.exports = {
+  run: run
+};
