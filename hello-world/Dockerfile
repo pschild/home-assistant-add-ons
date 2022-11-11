@@ -15,9 +15,9 @@ WORKDIR /home/pschild/data
 
 # WORKDIR data/
 
-COPY package.json /
-COPY puppeteer.js /
-COPY server.js /
+COPY package.json /home/pschild/data
+COPY puppeteer.js /home/pschild/data
+COPY server.js /home/pschild/data
 
 # RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
 
