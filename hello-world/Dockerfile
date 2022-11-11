@@ -8,7 +8,7 @@ RUN \
     nodejs \
     npm
 
-RUN useradd -ms /bin/bash pschild
+RUN adduser -s /bin/bash pschild
 
 USER pschild
 WORKDIR /home/pschild/data
