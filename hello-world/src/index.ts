@@ -4,7 +4,7 @@ import { crawl } from './crawler';
 const app = express();
 const port = 8000;
 
-app.get('/', async (req, res) => {
+app.get('/crawl', async (req, res) => {
   const crawlResult = await crawl(
     {
       latitude: 51.5045685,
