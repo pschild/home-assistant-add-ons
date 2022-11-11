@@ -9,7 +9,8 @@ RUN \
     npm
 
 RUN adduser -s /bin/bash -S pschild
-RUN chown pschild /home/pschild
+RUN mkdir /home/pschild/data
+RUN chown pschild /home/pschild/data
 USER pschild
 
 WORKDIR /home/pschild/data
@@ -18,6 +19,6 @@ COPY package.json .
 COPY puppeteer.js .
 COPY server.js .
 
-# RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
+RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
 
 CMD [ "node", "server.js" ]
