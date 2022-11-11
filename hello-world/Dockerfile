@@ -8,12 +8,12 @@ RUN \
     nodejs \
     npm
 
-#RUN adduser -s /bin/bash pschild
+RUN adduser -s /bin/bash -S pschild
 
-#USER pschild
-#WORKDIR /home/pschild/data
+USER pschild
+WORKDIR /home/pschild/data
 
-WORKDIR data/
+# WORKDIR data/
 
 COPY package.json /
 COPY puppeteer.js /
