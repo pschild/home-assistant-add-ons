@@ -9,13 +9,13 @@ let launchOptions = {
 
 const parseDelayClass = (html) => {
   if (html.includes('delay-light')) {
-    return TrafficDelay.LIGHT;
+    return 'LIGHT';
   } else if (html.includes('delay-medium')) {
-    return TrafficDelay.MEDIUM;
+    return 'MEDIUM';
   } else if (html.includes('delay-heavy')) {
-    return TrafficDelay.HEAVY;
+    return 'HEAVY';
   } else {
-    return TrafficDelay.DEFAULT;
+    return 'DEFAULT';
   }
 }
 
