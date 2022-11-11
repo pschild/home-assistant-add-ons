@@ -8,7 +8,7 @@ const requestListener = async function(req, res) {
   res.setHeader("Content-Type", "application/json");
   res.writeHead(200);
   // res.end(`{"message": "This is a JSON response"}`);
-  res.json(result);
+  res.end(JSON.stringify(result));
 };
 
 const server = http.createServer(requestListener);
