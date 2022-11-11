@@ -15,10 +15,11 @@ USER pschild
 
 WORKDIR /home/pschild/data
 
+COPY src ./src
 COPY package.json .
-COPY puppeteer.js .
-COPY server.js .
+COPY tsconfig.json .
 
 RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
+RUN npm run build
 
-CMD [ "node", "server.js" ]
+CMD [ "node", "dist/index.js" ]
