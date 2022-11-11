@@ -4,14 +4,19 @@ FROM $BUILD_FROM
 # Install requirements for add-on
 RUN \
   apk add --no-cache --update \
+    chromium \
     nodejs \
     npm
 
-# Python 3 HTTP Server serves the current working dir
-# So let's set it to our add-on persistent data directory.
-WORKDIR /data
+RUN useradd -ms /bin/bash pschild
 
-# Copy data for add-on
+USER pschild
+WORKDIR /home/pschild/data
+
+COPY package.json /
+COPY puppeteer.js /
 COPY server.js /
+
+RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
 
 CMD [ "node", "/server.js" ]
