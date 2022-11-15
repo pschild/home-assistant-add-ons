@@ -19,6 +19,23 @@ app.get('/crawl', async (req, res) => {
   res.json(crawlResult);
 });
 
+app.get('/crawl/:fromLatLng/:toLatLng', async (req, res) => {
+  const [fromLat, fromLng] = req.params.fromLatLng.split(',');
+  const [toLat, toLng] = req.params.toLatLng.split(',');
+  log(`Query Params: [${fromLat},${fromLng}] -> [${toLat},${toLng}]`);
+  const crawlResult = await crawl(
+    {
+      latitude: +fromLat,
+      longitude: +fromLng
+    },
+    {
+      latitude: +toLat,
+      longitude: +toLng
+    }
+  );
+  res.json(crawlResult);
+});
+
 app.listen(port, () => {
   log(`server started at port ${port}`);
 });
