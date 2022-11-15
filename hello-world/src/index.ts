@@ -1,5 +1,6 @@
 import * as express from 'express';
 import { crawl } from './crawler';
+import { log } from './util';
 
 const app = express();
 const port = 8000;
@@ -19,5 +20,5 @@ app.get('/crawl', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`server started at port ${port}`);
+  log(`server started at port ${port}`);
 });

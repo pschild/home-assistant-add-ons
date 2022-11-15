@@ -1,4 +1,5 @@
 import * as puppeteer from 'puppeteer';
+import { log } from './util';
 
 export interface LatLng {
   latitude: number;
@@ -34,27 +35,27 @@ export const crawl = async (origin: LatLng, destination: LatLng) => {
     // pass logs within headless browser to main console
     page.on('console', consoleObj => {
       if (consoleObj.type() === 'log') {
-        console.log(consoleObj.text());
+        log(consoleObj.text());
       }
     });
 
-    console.log('Go to page ...');
+    log('Go to page ...');
     // Example: https://www.google.de/maps/dir/51.5045685,6.9971393/51.668189,6.148282/data=!3m1!4b1!4m2!4m1!3e0
     await page.goto(
       `https://www.google.de/maps/dir/${origin.latitude},${origin.longitude}/${destination.latitude},${destination.longitude}/data=!3m1!4b1!4m2!4m1!3e0`
     );
-    console.log('Check if we need to accept cookies ...');
+    log('Check if we need to accept cookies ...');
     const acceptButton = await page.$x('.//button/span[contains(text(), "Alle akzeptieren")]');
     if (!!acceptButton && acceptButton.length) {
-      console.log('Accept cookies ...');
+      log('Accept cookies ...');
       await acceptButton[0].click();
     }
 
-    console.log('Wait for trips visible ...');
+    log('Wait for trips visible ...');
     // take the first trip as indicator for the page finished loading
     await page.waitFor(`#section-directions-trip-0`);
 
-    console.log('Evaluating page ...');
+    log('Evaluating page ...');
     const trips: { text: string; html: string }[] = await page.evaluate(() => {
       const DURATION_ROW_SELECTOR = `section-directions-trip-`;
 
@@ -68,16 +69,16 @@ export const crawl = async (origin: LatLng, destination: LatLng) => {
       const minutes = parseDuration(trip.text);
       const distance = parseDistance(trip.text);
       const delay = parseDelayClass(trip.html);
-      console.log(`duration=${minutes}, distance=${distance}, delay=${delay}`);
+      log(`duration=${minutes}, distance=${distance}, delay=${delay}`);
       return { minutes, distance, delay };
     });
 
   } catch (error) {
-    console.error(error);
+    log(`Error! ${error}`);
     throw new Error(`Puppeteer parsing failed: ${error}`);
 
   } finally {
-    console.log('Closing browser ...');
+    log('Closing browser ...');
     await browser.close();
   }
 };

@@ -3,6 +3,8 @@ description: "My first real add-on!"
 version: "0.0.28"
 slug: "hello_world"
 init: false
+map:
+  - config:rw
 arch:
   - aarch64
   - amd64
