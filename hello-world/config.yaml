@@ -1,6 +1,6 @@
 name: "Hello world"
 description: "My first real add-on!"
-version: "0.0.28"
+version: "0.0.29"
 slug: "hello_world"
 init: false
 map:
