@@ -8,20 +8,6 @@ const port = 8000;
 
 let LAST_CRAWL_DATE: Date = null;
 
-app.get('/crawl', async (req, res) => {
-  const crawlResult = await crawl(
-    {
-      latitude: 51.5045685,
-      longitude: 6.9971393
-    },
-    {
-      latitude: 51.668189,
-      longitude: 6.148282
-    }
-  );
-  res.json(crawlResult);
-});
-
 app.get('/crawl/:fromLatLng/:toLatLng', async (req, res) => {
   const now = new Date();
 

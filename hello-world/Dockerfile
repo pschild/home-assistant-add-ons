@@ -22,4 +22,6 @@ COPY tsconfig.json .
 RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
 RUN npm run compile
 
+ENV TZ=Europe/Berlin
+
 CMD [ "node", "dist/index.js" ]
