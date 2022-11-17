@@ -11,8 +11,8 @@ const port = 8000;
 app.get('/crawl', async (req, res) => {
   log(`Query Params: ${JSON.stringify(req.query)}`);
   res.json({
-    minutes: 42,
-    distance: 4.2,
+    minutes: 42 + Math.random() * 10,
+    distance: 4.2 + Math.random() * 100,
     delay: 'light'
   });
 });
