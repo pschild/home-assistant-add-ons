@@ -1,6 +1,6 @@
 name: "Hello world"
 description: "My first real add-on!"
-version: "0.0.30"
+version: "0.0.31"
 slug: "hello_world"
 init: false
 map:
@@ -14,3 +14,7 @@ arch:
 startup: before
 ports:
   8000/tcp: 8000
+options:
+  test: 5
+schema:
+  test: int
