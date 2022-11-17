@@ -6,10 +6,10 @@ import { differenceInMinutes } from 'date-fns';
 const app = express();
 const port = 8000;
 
-let LAST_CRAWL_DATE: Date = null;
+// let LAST_CRAWL_DATE: Date = null;
 
 app.get('/crawl/:fromLatLng/:toLatLng', async (req, res) => {
-  const now = new Date();
+  // const now = new Date();
 
   const [fromLat, fromLng] = req.params.fromLatLng.split(',');
   const [toLat, toLng] = req.params.toLatLng.split(',');
@@ -21,12 +21,12 @@ app.get('/crawl/:fromLatLng/:toLatLng', async (req, res) => {
     return;
   }
 
-  if (LAST_CRAWL_DATE && differenceInMinutes(now, LAST_CRAWL_DATE) < 5) {
-    log(`Cancelling request, passed time since last crawl: ${differenceInMinutes(now, LAST_CRAWL_DATE)}`);
-    return;
-  }
+  // if (LAST_CRAWL_DATE && differenceInMinutes(now, LAST_CRAWL_DATE) < 5) {
+  //   log(`Cancelling request, passed time since last crawl: ${differenceInMinutes(now, LAST_CRAWL_DATE)}`);
+  //   return;
+  // }
 
-  const crawlResult = await crawl(
+  const result = await crawl(
     {
       latitude: +fromLat,
       longitude: +fromLng
@@ -36,9 +36,11 @@ app.get('/crawl/:fromLatLng/:toLatLng', async (req, res) => {
       longitude: +toLng
     }
   );
-  res.json(crawlResult);
+  log(JSON.stringify(result));
+  const minResult = result.reduce((prev, curr) => prev.minutes < curr.minutes ? prev : curr);
+  res.json(minResult);
 
-  LAST_CRAWL_DATE = now;
+  // LAST_CRAWL_DATE = now;
 });
 
 app.listen(port, () => {
