@@ -8,6 +8,15 @@ const port = 8000;
 
 // let LAST_CRAWL_DATE: Date = null;
 
+app.get('/crawl', async (req, res) => {
+  log(`Query Params: ${JSON.stringify(req.query)}`);
+  res.json({
+    minutes: 42,
+    distance: 4.2,
+    delay: 'light'
+  });
+});
+
 app.get('/crawl/:fromLatLng/:toLatLng', async (req, res) => {
   // const now = new Date();
 
