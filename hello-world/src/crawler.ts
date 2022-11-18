@@ -1,5 +1,6 @@
 import * as puppeteer from 'puppeteer';
 import { log } from './util';
+import * as path from 'path';
 
 export interface LatLng {
   latitude: number;
@@ -20,16 +21,16 @@ export interface CrawlResultItem {
 }
 
 export const crawl = async (origin: LatLng, destination: LatLng) => {
-  // const launchOptions = {
-  //   headless: true,
-  //   defaultViewport: { width: 1024, height: 768 },
+  const launchOptions = {
+    headless: true,
+    defaultViewport: { width: 1024, height: 768 },
   //   executablePath: '/usr/bin/chromium',
   //   args: ['--no-sandbox']
-  // };
+  };
 
   let browser;
   try {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
 
     // pass logs within headless browser to main console
@@ -65,6 +66,14 @@ export const crawl = async (origin: LatLng, destination: LatLng) => {
         .map(row => ({ text: (row as HTMLElement).innerText, html: row.innerHTML }))
     });
 
+    // Screenshot
+    await page.waitFor(10000);
+    log('Saving screenshot ...');
+    await page.screenshot({
+      path: path.join(__dirname, `screenshot.png`),
+      clip: { x: 435, y: 110, width: 1024 - 435, height: 768 - 110 * 2 }
+    });
+
     return trips.map(trip => {
       const minutes = parseDuration(trip.text);
       const distance = parseDistance(trip.text);
@@ -95,6 +104,10 @@ const parseDelayClass = (html: string): TrafficDelay => {
   }
 }
 
+/**
+ * @param text Raw text from website
+ * @returns Duration (in minutes)
+ */
 const parseDuration = (text: string): number => {
   // Attention! "(?= (Std.|h))" does not work as lookahead pattern, as we cannot be sure if a normal space or a "different kind" of space (?) is in front of "Std." or "h".
   // So we need to match for a single character with . instead... => "(?=.(Std.|h))". Same applies for parsing the minutes.
@@ -111,6 +124,10 @@ const parseDuration = (text: string): number => {
   return duration;
 }
 
+/**
+ * @param text Raw text from website
+ * @returns Distance (in km)
+ */
 const parseDistance = (text: string): number => {
   const distancePartKm = text.match(/\d+,?\d+(?=.(km))/g); // match "1,0 km", "63,7 km", "163 km"
   if (Array.isArray(distancePartKm) && distancePartKm.length) {

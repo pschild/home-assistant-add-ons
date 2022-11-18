@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
+import * as path from 'path';
 
 const app = express();
 const port = 8000;
@@ -30,8 +31,18 @@ app.get('/crawl', async (req, res) => {
     }
   );
   log(`Result: ${JSON.stringify(result)}`);
-  const minResult = result.reduce((prev, curr) => prev.minutes < curr.minutes ? prev : curr);
-  res.json(minResult);
+
+  // getting the route with the fastest time
+  // const bestResult = result.reduce((prev, curr) => prev.minutes < curr.minutes ? prev : curr);
+
+  // assuming that google will show the fastest/best route as first result
+  const bestResult = result[0];
+
+  res.json(bestResult);
+});
+
+app.get('/screenshot', async (req, res) => {
+  res.sendFile(path.join(__dirname, `screenshot.png`));
 });
 
 app.listen(port, () => {
