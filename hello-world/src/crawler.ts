@@ -1,6 +1,7 @@
 import * as puppeteer from 'puppeteer';
 import { log } from './util';
 import * as path from 'path';
+import { add, format } from 'date-fns';
 
 export interface LatLng {
   latitude: number;
@@ -67,19 +68,20 @@ export const crawl = async (origin: LatLng, destination: LatLng) => {
     });
 
     // Screenshot
-    await page.waitFor(10000);
-    log('Saving screenshot ...');
-    await page.screenshot({
-      path: path.join(__dirname, `screenshot.png`),
-      clip: { x: 435, y: 110, width: 1024 - 435, height: 768 - 110 * 2 }
-    });
+    // await page.waitFor(10000);
+    // log('Saving screenshot ...');
+    // await page.screenshot({
+    //   path: path.join(__dirname, `screenshot.png`),
+    //   clip: { x: 435, y: 110, width: 1024 - 435, height: 768 - 110 * 2 }
+    // });
 
     return trips.map(trip => {
       const minutes = parseDuration(trip.text);
+      const eta = format(add(new Date(), { minutes }), 'HH:mm');
       const distance = parseDistance(trip.text);
       const delay = parseDelayClass(trip.html);
       log(`duration=${minutes}, distance=${distance}, delay=${delay}`);
-      return { minutes, distance, delay };
+      return { minutes, distance, delay, eta };
     });
 
   } catch (error) {
