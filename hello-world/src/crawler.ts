@@ -81,7 +81,7 @@ export const crawl = async (origin: LatLng, destination: LatLng) => {
       const distance = parseDistance(trip.text);
       const delay = parseDelayClass(trip.html);
       log(`duration=${minutes}, distance=${distance}, delay=${delay}`);
-      return { minutes, distance, delay, eta };
+      return { minutes, eta, distance, delay };
     });
 
   } catch (error) {
