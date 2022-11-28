@@ -8,6 +8,10 @@ RUN \
     nodejs \
     npm
 
+# Setting timezone
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN adduser -s /bin/bash -S pschild
 RUN mkdir /home/pschild/data
 RUN chown pschild /home/pschild/data
@@ -21,8 +25,5 @@ COPY tsconfig.json .
 
 RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
 RUN npm run compile
-
-ENV TZ=Europe/Berlin
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 CMD [ "node", "dist/index.js" ]
