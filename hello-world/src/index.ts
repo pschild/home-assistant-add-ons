@@ -47,8 +47,4 @@ app.get('/screenshot', async (req, res) => {
 
 app.listen(port, () => {
   log(`server started at port ${port}`);
-  console.log(process.env);
-  console.log(process.env.options);
-  console.log(process.env.test);
-  console.log(JSON.stringify(process.env));
 });
