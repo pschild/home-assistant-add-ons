@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
+import { add, format } from 'date-fns';
 import * as path from 'path';
 
 const app = express();
@@ -31,6 +32,11 @@ app.get('/crawl', async (req, res) => {
     }
   );
   log(`Result: ${JSON.stringify(result)}`);
+
+  log(`now=${new Date()}`);
+  log(`now iso=${new Date().toISOString()}`);
+  log(`now utc=${new Date().toUTCString()}`);
+  log(`add minutes=${format(add(new Date(), { minutes: 10 }), 'HH:mm')}`);
 
   // getting the route with the fastest time
   // const bestResult = result.reduce((prev, curr) => prev.minutes < curr.minutes ? prev : curr);
