@@ -1,7 +1,6 @@
 import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
-import { add, format } from 'date-fns';
 import * as path from 'path';
 
 const app = express();
@@ -48,8 +47,8 @@ app.get('/screenshot', async (req, res) => {
 
 app.listen(port, () => {
   log(`server started at port ${port}`);
-
-  log(`now=${new Date()}`);
-  log(`now=${new Date().getTimezoneOffset()}`);
-  log(`add minutes=${format(add(new Date(), { minutes: 10 }), 'HH:mm')}`);
+  console.log(process.env);
+  console.log(process.env.options);
+  console.log(process.env.test);
+  console.log(JSON.stringify(process.env));
 });
