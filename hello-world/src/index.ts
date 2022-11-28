@@ -33,11 +33,6 @@ app.get('/crawl', async (req, res) => {
   );
   log(`Result: ${JSON.stringify(result)}`);
 
-  log(`now=${new Date()}`);
-  log(`now iso=${new Date().toISOString()}`);
-  log(`now utc=${new Date().toUTCString()}`);
-  log(`add minutes=${format(add(new Date(), { minutes: 10 }), 'HH:mm')}`);
-
   // getting the route with the fastest time
   // const bestResult = result.reduce((prev, curr) => prev.minutes < curr.minutes ? prev : curr);
 
@@ -53,4 +48,8 @@ app.get('/screenshot', async (req, res) => {
 
 app.listen(port, () => {
   log(`server started at port ${port}`);
+
+  log(`now=${new Date()}`);
+  log(`now=${new Date().getTimezoneOffset()}`);
+  log(`add minutes=${format(add(new Date(), { minutes: 10 }), 'HH:mm')}`);
 });
