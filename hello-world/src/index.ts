@@ -20,25 +20,29 @@ app.get('/crawl', async (req, res) => {
     return;
   }
 
-  const result = await crawl(
-    {
-      latitude: fromLat,
-      longitude: fromLng
-    },
-    {
-      latitude: toLat,
-      longitude: toLng
-    }
-  );
-  log(`Result: ${JSON.stringify(result)}`);
+  try {
+    const result = await crawl(
+      {
+        latitude: fromLat,
+        longitude: fromLng
+      },
+      {
+        latitude: toLat,
+        longitude: toLng
+      }
+    );
+    log(`Result: ${JSON.stringify(result)}`);
 
-  // getting the route with the fastest time
-  // const bestResult = result.reduce((prev, curr) => prev.minutes < curr.minutes ? prev : curr);
+    // getting the route with the fastest time
+    // const bestResult = result.reduce((prev, curr) => prev.minutes < curr.minutes ? prev : curr);
 
-  // assuming that google will show the fastest/best route as first result
-  const bestResult = result[0];
+    // assuming that google will show the fastest/best route as first result
+    const bestResult = result[0];
 
-  res.json(bestResult);
+    res.json(bestResult);
+  } catch (e) {
+    res.status(500);
+  }
 });
 
 app.get('/screenshot', async (req, res) => {
@@ -46,5 +50,9 @@ app.get('/screenshot', async (req, res) => {
 });
 
 app.listen(port, () => {
+  // const file = fs.readFileSync('/config/configuration.yml', 'utf8');
+  // const result = YAML.parse(file);
+  // console.log(result);
+
   log(`server started at port ${port}`);
 });
