@@ -1,6 +1,6 @@
 name: "Hello world"
 description: "Add-on for crawling commuting times"
-version: "0.0.45"
+version: "0.0.46"
 slug: "hello_world"
 init: false
 map:

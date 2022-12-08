@@ -17,12 +17,12 @@ app.get('/crawl', async (req, res) => {
 
   if (!fromLat || !fromLng || !toLat || !toLng) {
     log('Empty coords!');
-    return;
+    return res.status(500).end();
   }
 
   if (isNaN(fromLat) || isNaN(fromLng) || isNaN(toLat) || isNaN(toLng)) {
     log('Coords could not be parsed to numbers!');
-    return;
+    return res.status(500).end();
   }
 
   try {
@@ -46,7 +46,7 @@ app.get('/crawl', async (req, res) => {
 
     res.json(bestResult);
   } catch (e) {
-    res.status(500);
+    res.status(500).end();
   }
 });
 
