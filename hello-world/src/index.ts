@@ -15,8 +15,13 @@ app.get('/crawl', async (req, res) => {
   const toLat = +params.to_lat;
   const toLng = +params.to_lng;
 
+  if (!fromLat || !fromLng || !toLat || !toLng) {
+    log('Empty coords!');
+    return;
+  }
+
   if (isNaN(fromLat) || isNaN(fromLng) || isNaN(toLat) || isNaN(toLng)) {
-    log('Coords in wrong format!');
+    log('Coords could not be parsed to numbers!');
     return;
   }
 
