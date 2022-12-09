@@ -44,7 +44,8 @@ export const crawl = async (origin: LatLng, destination: LatLng) => {
     log('Go to page ...');
     // Example: https://www.google.de/maps/dir/51.5045685,6.9971393/51.668189,6.148282/data=!3m1!4b1!4m2!4m1!3e0
     await page.goto(
-      `https://www.google.de/maps/dir/${origin.latitude},${origin.longitude}/${destination.latitude},${destination.longitude}/data=!3m1!4b1!4m2!4m1!3e0`
+      `https://www.google.de/maps/dir/${origin.latitude},${origin.longitude}/${destination.latitude},${destination.longitude}/data=!3m1!4b1!4m2!4m1!3e0`,
+      { waitUntil: 'networkidle2' }
     );
     log('Check if we need to accept cookies ...');
     const acceptButton = await page.$x('.//button/span[contains(text(), "Alle akzeptieren")]');
