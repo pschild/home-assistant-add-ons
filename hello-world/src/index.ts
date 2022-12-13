@@ -2,6 +2,7 @@ import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
 import * as path from 'path';
+import axios from 'axios';
 
 const app = express();
 const port = 8000;
@@ -48,6 +49,12 @@ app.get('/crawl', async (req, res) => {
   } catch (e) {
     res.status(500).end();
   }
+});
+
+app.get('/test', async (req, res) => {
+  const response = await axios.get(`https://www.pschild.de/`)
+    .catch(err => console.log('Error axios:', err));
+  res.send(response);
 });
 
 app.get('/screenshot', async (req, res) => {
