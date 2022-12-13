@@ -23,7 +23,7 @@ COPY src ./src
 COPY package.json .
 COPY tsconfig.json .
 
-RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
+RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && PUPPETEER_PRODUCT=firefox && npm install
 RUN npm run compile
 
 CMD [ "node", "dist/index.js" ]

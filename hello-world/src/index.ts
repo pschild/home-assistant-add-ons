@@ -52,10 +52,11 @@ app.get('/crawl', async (req, res) => {
 });
 
 app.get('/test', async (req, res) => {
-  const response = await axios.get(`https://www.pschild.de/`)
+  const response = await axios.get(`https://www.google.de/maps/dir/51.5045685,6.9971393/51.668189,6.148282/data=!3m1!4b1!4m2!4m1!3e0`)
     .catch(err => console.log('Error axios:', err));
   console.log((response as any).data);
-  res.send({ size: (response as any).data.length });
+  // res.send({ size: (response as any).data.length });
+  res.send((response as any).data);
 });
 
 app.get('/screenshot', async (req, res) => {
