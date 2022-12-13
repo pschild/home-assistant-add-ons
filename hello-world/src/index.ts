@@ -54,7 +54,8 @@ app.get('/crawl', async (req, res) => {
 app.get('/test', async (req, res) => {
   const response = await axios.get(`https://www.pschild.de/`)
     .catch(err => console.log('Error axios:', err));
-  res.send(response);
+  console.log((response as any).data);
+  res.send((response as any).data.length);
 });
 
 app.get('/screenshot', async (req, res) => {
