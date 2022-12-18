@@ -54,10 +54,10 @@ app.get('/screenshot', async (req, res) => {
   res.sendFile(path.join(__dirname, `screenshot.png`));
 });
 
-/*app.listen(port, () => {
+app.listen(port, () => {
   // const file = fs.readFileSync('/config/configuration.yml', 'utf8');
   // const result = YAML.parse(file);
   // console.log(result);
 
   log(`server started at port ${port}`);
-});*/
+});
