@@ -25,7 +25,7 @@ export const crawl = async (origin: LatLng, destination: LatLng) => {
   const launchOptions = {
     headless: true,
     defaultViewport: { width: 1024, height: 768 },
-    // executablePath: '/usr/bin/chromium',
+    executablePath: '/usr/bin/chromium-browser',
     args: ['--no-sandbox']
   };
 
