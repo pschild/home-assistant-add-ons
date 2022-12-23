@@ -11,6 +11,7 @@
     "typeRoots": [
       "node_modules/@types"
     ],
+    "module": "commonjs",
     "lib": [
       "es2017",
       "es2016",
