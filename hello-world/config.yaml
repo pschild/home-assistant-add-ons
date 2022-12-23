@@ -1,6 +1,6 @@
 name: "Hello world"
 description: "Add-on for crawling commuting times"
-version: "0.0.60"
+version: "0.0.61"
 slug: "hello_world"
 init: false
 map:
@@ -15,6 +15,7 @@ startup: before
 ports:
   8000/tcp: 8000
   8001/tcp: 8001
+  8002/tcp: 8002
 options:
   test: 5
 schema:

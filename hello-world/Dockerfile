@@ -4,7 +4,6 @@ FROM $BUILD_FROM
 # Install requirements for add-on
 RUN \
   apk add --no-cache --update \
-    python3 \
     chromium \
     nodejs \
     npm
@@ -23,11 +22,8 @@ WORKDIR /home/pschild/data
 COPY src ./src
 COPY package.json .
 COPY tsconfig.json .
-COPY run.sh .
-# RUN chmod a+x run.sh
 
 RUN export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true && npm install
 RUN npm run compile
 
-# CMD [ "node", "dist/index.js" ]
-CMD [ "run.sh" ]
+CMD [ "node", "dist/index.js" ]
