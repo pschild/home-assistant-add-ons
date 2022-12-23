@@ -22,7 +22,7 @@ import * as puppeteer from 'puppeteer';
   const links = await page.evaluate(resultsSelector => {
     return [...Array.from(document.querySelectorAll(resultsSelector))].map(anchor => {
       const title = anchor.textContent.split('|')[0].trim();
-      return `${title} - ${anchor.href}`;
+      return `${title} - ${anchor['href']}`;
     });
   }, resultsSelector);
 
