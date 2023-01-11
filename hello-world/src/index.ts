@@ -2,13 +2,42 @@ import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
 import * as path from 'path';
+import { tomtom } from './api';
 
 const app = express();
 const port = 8000;
 
+app.get('/api', async (req, res) => {
+  const params = req.query;
+  log(`API Endpoint, Query Params: ${JSON.stringify(params)}`);
+
+  const fromLat = +params.from_lat;
+  const fromLng = +params.from_lng;
+  const toLat = +params.to_lat;
+  const toLng = +params.to_lng;
+
+  if (!fromLat || !fromLng || !toLat || !toLng) {
+    log('Empty coords!');
+    return res.status(500).end();
+  }
+
+  if (isNaN(fromLat) || isNaN(fromLng) || isNaN(toLat) || isNaN(toLng)) {
+    log('Coords could not be parsed to numbers!');
+    return res.status(500).end();
+  }
+
+  try {
+    const result = await tomtom(fromLat, fromLng, toLat, toLng);
+    log(`Result: ${JSON.stringify(result)}`);
+    res.json(result);
+  } catch (e) {
+    res.status(500).end();
+  }
+});
+
 app.get('/crawl', async (req, res) => {
   const params = req.query;
-  log(`Query Params: ${JSON.stringify(params)}`);
+  log(`Crawl Endpoint, Query Params: ${JSON.stringify(params)}`);
 
   const fromLat = +params.from_lat;
   const fromLng = +params.from_lng;

@@ -16,7 +16,8 @@
         ],
         "member-access": false,
         "member-ordering": false,
-        "max-classes-per-file": false
+        "max-classes-per-file": false,
+        "array-type": false
     },
     "rulesDirectory": []
 }
