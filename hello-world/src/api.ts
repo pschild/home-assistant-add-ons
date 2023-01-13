@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { log } from './util';
-import { add, format } from 'date-fns';
+import { add, differenceInHours, differenceInMinutes, format } from 'date-fns';
 
-interface ApiResponse {
+interface CommutingInfo {
   minutes: number;
   eta: string;
   distance: number;
@@ -40,7 +40,20 @@ interface WazeResponse {
   }>;
 }
 
-export function tomtom(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<ApiResponse> {
+interface WazeAlertsResponse {
+  alerts: Array<{
+    confidence: number; // 0, 1, 2, ..., 5
+    location: { x: number; y: number; };
+    pubMillis: number;
+    nThumbsUp: number; // 16
+    street: string; // A42, A42 > Dortmund
+    type: string; // POLICE, HAZARD
+    subtype: string; // POLICE_VISIBLE, nur bei type=POLICE
+    reportDescription: string; // nicht bei POLICE
+  }>;
+}
+
+export function tomtom(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<CommutingInfo> {
   const url = `https://mydrive.api-system.tomtom.com/routing/1/calculateRoute/${fromLat},${fromLng}:${toLat},${toLng}/json\
 ?key=sATA9OwG11zrMKQcCxR3eSEjj2n8Jsrg\
 &routeType=fastest\
@@ -89,7 +102,7 @@ export function tomtom(fromLat: number, fromLng: number, toLat: number, toLng: n
     });
 }
 
-export function waze(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<ApiResponse> {
+export function waze(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<CommutingInfo> {
   const url = `https://www.waze.com/live-map/api/user-drive?geo_env=row`;
 
   return axios.post<WazeResponse>(url, {
@@ -122,7 +135,45 @@ export function waze(fromLat: number, fromLng: number, toLat: number, toLng: num
     });
 }
 
-export function googleMaps(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<ApiResponse> {
+export function wazeAlert(lat: number, lng: number): Promise<string> {
+  const DELTA = 0.09;
+  const url = `https://www.waze.com/row-rtserver/web/TGeoRSS\
+?bottom=${lat - DELTA}\
+&left=${lng - DELTA}\
+&ma=200\
+&mj=200\
+&mu=20\
+&right=${lng + DELTA}\
+&top=${lat + DELTA}\
+&types=alerts%2Ctraffic
+`;
+
+  return axios.get<WazeAlertsResponse>(url)
+    .then((res) => {
+      log('WAZE ALERTS');
+      res.data.alerts?.filter((alert) => alert.type === 'POLICE' || alert.type === 'HAZARD').forEach((alert) => {
+        log(`typ: ${alert.type}, street: ${alert.street}, since: ${format(new Date(alert.pubMillis), 'dd.MM. HH:mm')}, confidence: ${alert.confidence}, thumbsUp: ${alert.nThumbsUp}, description: ${alert.reportDescription}`);
+      });
+      return res;
+    })
+    .then((res) => {
+      if (res.data.alerts && res.data.alerts.length > 0) {
+        const policeAlerts = res.data.alerts
+          .filter((alert) => alert.type === 'POLICE')
+          .filter((alert) => alert.street === 'A40' || alert.street === 'A42' || alert.street === 'A57')
+          .filter((alert) => differenceInHours(new Date(), new Date(alert.pubMillis)) <= 12)
+        ;
+        const strings = policeAlerts.map((alert) => {
+          const sinceHours = differenceInHours(new Date(), new Date(alert.pubMillis));
+          const since = sinceHours >= 1 ? `${sinceHours}h` : `${differenceInMinutes(new Date(), new Date(alert.pubMillis))}min`;
+          return `${alert.street.substring(0,8)} vor ${since} (${alert.confidence})`;
+        });
+        return strings.join(', ');
+      }
+    });
+}
+
+export function googleMaps(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<CommutingInfo> {
   const url = `https://www.google.de/maps/preview/directions\
 ?authuser=0\
 &hl=de\

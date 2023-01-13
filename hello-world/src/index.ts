@@ -2,7 +2,7 @@ import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
 import * as path from 'path';
-import { googleMaps, tomtom, waze } from './api';
+import { googleMaps, tomtom, waze, wazeAlert } from './api';
 
 const app = express();
 const port = 8000;
@@ -31,6 +31,33 @@ app.get('/api', async (req, res) => {
     waze(fromLat, fromLng, toLat, toLng).then((result) => log(`Waze Result: ${JSON.stringify(result)}`));
     tomtom(fromLat, fromLng, toLat, toLng).then((result) => {
       log(`TomTom Result: ${JSON.stringify(result)}`);
+      res.json(result);
+    });
+  } catch (e) {
+    res.status(500).end();
+  }
+});
+
+app.get('/alerts', async (req, res) => {
+  const params = req.query;
+  log(`Alerts Endpoint, Query Params: ${JSON.stringify(params)}`);
+
+  const lat = +params.lat;
+  const lng = +params.lng;
+
+  if (!lat || !lng) {
+    log('Empty coords!');
+    return res.status(500).end();
+  }
+
+  if (isNaN(lat) || isNaN(lng)) {
+    log('Coords could not be parsed to numbers!');
+    return res.status(500).end();
+  }
+
+  try {
+    wazeAlert(lat, lng).then((result) => {
+      log(`WazeAlert Result: ${JSON.stringify(result)}`);
       res.json(result);
     });
   } catch (e) {
