@@ -118,5 +118,7 @@ app.listen(port, () => {
   // const result = YAML.parse(file);
   // console.log(result);
 
+  console.log(`TRAFFIC_PROVIDER=${process.env.TRAFFIC_PROVIDER}`);
+
   log(`server started at port ${port}`);
 });
