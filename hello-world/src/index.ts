@@ -2,7 +2,7 @@ import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
 import * as path from 'path';
-import { tomtom, waze } from './api';
+import { googleMaps, tomtom, waze } from './api';
 
 const app = express();
 const port = 8000;
@@ -27,13 +27,12 @@ app.get('/api', async (req, res) => {
   }
 
   try {
-    const wazeResult = await waze(fromLat, fromLng, toLat, toLng);
-    log(`Waze Result: ${JSON.stringify(wazeResult)}`);
-
-    const tomtomResult = await tomtom(fromLat, fromLng, toLat, toLng);
-    log(`TomTom Result: ${JSON.stringify(tomtomResult)}`);
-
-    res.json(tomtomResult);
+    googleMaps(fromLat, fromLng, toLat, toLng).then((result) => log(`Google Maps Result: ${JSON.stringify(result)}`));
+    waze(fromLat, fromLng, toLat, toLng).then((result) => log(`Waze Result: ${JSON.stringify(result)}`));
+    tomtom(fromLat, fromLng, toLat, toLng).then((result) => {
+      log(`TomTom Result: ${JSON.stringify(result)}`);
+      res.json(result);
+    });
   } catch (e) {
     res.status(500).end();
   }

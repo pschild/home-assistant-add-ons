@@ -41,7 +41,7 @@ interface WazeResponse {
 }
 
 export function tomtom(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<ApiResponse> {
-  const TOM_TOM_ROUTE = `https://mydrive.api-system.tomtom.com/routing/1/calculateRoute/${fromLat},${fromLng}:${toLat},${toLng}/json\
+  const url = `https://mydrive.api-system.tomtom.com/routing/1/calculateRoute/${fromLat},${fromLng}:${toLat},${toLng}/json\
 ?key=sATA9OwG11zrMKQcCxR3eSEjj2n8Jsrg\
 &routeType=fastest\
 &traffic=true\
@@ -61,7 +61,7 @@ export function tomtom(fromLat: number, fromLng: number, toLat: number, toLng: n
 &sectionType=tunnel
 `;
 
-  return axios.get<TomTomResponse>(TOM_TOM_ROUTE)
+  return axios.get<TomTomResponse>(url)
     .then((res) => {
       log('TOMTOM');
       res.data.routes.forEach((route) => {
@@ -118,6 +118,68 @@ export function waze(fromLat: number, fromLng: number, toLat: number, toLng: num
         eta,
         distance,
         delay: 'normal'
+      };
+    });
+}
+
+export function googleMaps(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<ApiResponse> {
+  const url = `https://www.google.de/maps/preview/directions\
+?authuser=0\
+&hl=de\
+&gl=de\
+&pb=!1m4!3m2\
+!3d\
+${fromLat}\
+!4d\
+${fromLng}\
+!6e2!1m4!3m2\
+!3d\
+${toLat}\
+!4d\
+${toLng}\
+!6e2!3m9!1m3\
+!1d\
+68734.00686075684\
+!2d\
+6.6666666666666\
+!3d\
+55.555555555555\
+!2m0!3m2!1i2156!2i1329!4f13.1!6m23!1m1!18b1!2m3!5m1!6e2!20e3!6m8!4b1!49b1!74i150000!75b1!85b1!89b1!114b1!149b1!10b1!14b1!16b1!17m1!3e1!20m2!1e0!2e3!8m0!15m4!1s91jAY5GfFNyAi-gPq9Sf4Ao!4m1!2i5620!7e81!20m28!1m6!1m2!1i0!2i0!2m2!1i458!2i1329!1m6!1m2!1i2106!2i0!2m2!1i2156!2i1329!1m6!1m2!1i0!2i0!2m2!1i2156!2i20!1m6!1m2!1i0!2i1309!2m2!1i2156!2i1329!27b1!28m0!40i629
+`;
+
+  const trafficTypes = ['default', 'light', 'medium', 'heavy'];
+
+  return axios.get<any>(url)
+    .then((res) => {
+      log('GOOGLE MAPS');
+      const json = JSON.parse(res.data.substring(4));
+      const routes = json[0][1];
+      routes.forEach((route) => {
+        const name = route[0][1];
+        const distance = route[0][2][0];
+        const duration = route[0][10][0][0];
+        const trafficType = route[0][10][1];
+        const isFastestRoute = !!JSON.stringify(route).match('Schnellste Route');
+        const etaTextMatch = JSON.stringify(route).match('Du kommst etwa um (.+) an.');
+        log(`${(distance / 1000).toFixed(1)}km, ${toDuration(duration)}, ${trafficTypes[trafficType]}, schnellste: ${isFastestRoute}, etaText: ${etaTextMatch ? etaTextMatch[1] : 'N/A'}`);
+        log(`über ${name}`);
+      });
+      return res;
+    })
+    .then((res) => {
+      const json = JSON.parse(res.data.substring(4));
+      const routes = json[0][1];
+      const bestRoute = routes[0];
+      const minutes = Math.ceil(bestRoute[0][10][0][0] / 60);
+      const eta = format(add(new Date(), { minutes }), 'HH:mm');
+      const distance = +((bestRoute[0][2][0] / 1000).toFixed(1));
+      const delayIndex = bestRoute[0][10][1];
+      const delay = trafficTypes[delayIndex];
+      return {
+        minutes,
+        eta,
+        distance,
+        delay,
       };
     });
 }
