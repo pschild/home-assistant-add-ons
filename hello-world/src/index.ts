@@ -27,6 +27,14 @@ app.get('/api', async (req, res) => {
   }
 
   try {
+    switch (process.env.TRAFFIC_PROVIDER) {
+      case 'WAZE':
+        console.log('choosing WAZE');
+      case 'TomTom':
+        console.log('choosing TomTom');
+      case 'Google Maps':
+        console.log('choosing Google Maps');
+    }
     googleMaps(fromLat, fromLng, toLat, toLng).then((result) => log(`Google Maps Result: ${JSON.stringify(result)}`));
     waze(fromLat, fromLng, toLat, toLng).then((result) => log(`Waze Result: ${JSON.stringify(result)}`));
     tomtom(fromLat, fromLng, toLat, toLng).then((result) => {

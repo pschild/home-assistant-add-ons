@@ -1,0 +1,6 @@
+---
+configuration:
+  traffic_provider:
+    name: Traffic Provider
+    description: >-
+      Welche API soll zum Pendeln abgefragt werden
