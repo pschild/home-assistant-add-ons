@@ -1,6 +1,6 @@
 name: "Hello world"
 description: "Add-on for crawling commuting times"
-version: "0.0.74"
+version: "0.0.75"
 slug: "hello_world"
 init: false
 map:
@@ -17,5 +17,4 @@ ports:
 options:
   traffic_provider: TomTom
 schema:
-  traffic_provider:
-    - list(Google Maps|TomTom|WAZE)
+  traffic_provider: list(Google Maps|TomTom|WAZE)
