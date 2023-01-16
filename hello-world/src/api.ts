@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { log } from './util';
-import { add, differenceInHours, differenceInMinutes, format } from 'date-fns';
+import { add, differenceInDays, differenceInHours, differenceInMinutes, format, parse } from 'date-fns';
 
 interface CommutingInfo {
   minutes: number;
@@ -50,6 +50,22 @@ interface WazeAlertsResponse {
     type: string; // POLICE, HAZARD
     subtype: string; // POLICE_VISIBLE, nur bei type=POLICE
     reportDescription: string; // nicht bei POLICE
+  }>;
+}
+
+interface BlitzerDeResponse {
+  pois: Array<{
+    confirm_date: string; // 11:34, 01.01.1970
+    create_date: string; // 11:23, 30.03.2015
+    lat: string;
+    lng: string;
+    type: string; // 1, 107, 110
+    vmax: string; // 30 (km/h)
+    info?: {
+      confirmed?: string; // 1
+      quality?: string; // 10
+      desc?: string; // text
+    };
   }>;
 }
 
@@ -135,7 +151,7 @@ export function waze(fromLat: number, fromLng: number, toLat: number, toLng: num
     });
 }
 
-export function wazeAlert(lat: number, lng: number): Promise<string> {
+export function wazeAlert(lat: number, lng: number): Promise<string[]> {
   const DELTA = 0.09;
   const url = `https://www.waze.com/row-rtserver/web/TGeoRSS\
 ?bottom=${lat - DELTA}\
@@ -160,15 +176,59 @@ export function wazeAlert(lat: number, lng: number): Promise<string> {
       if (res.data.alerts && res.data.alerts.length > 0) {
         const policeAlerts = res.data.alerts
           .filter((alert) => alert.type === 'POLICE')
-          .filter((alert) => alert.street === 'A40' || alert.street === 'A42' || alert.street === 'A57')
+          .filter((alert) => !!alert.street.match(/(A\d+)/))
           .filter((alert) => differenceInHours(new Date(), new Date(alert.pubMillis)) <= 12)
         ;
-        const strings = policeAlerts.map((alert) => {
+        return policeAlerts.map((alert) => {
           const sinceHours = differenceInHours(new Date(), new Date(alert.pubMillis));
           const since = sinceHours >= 1 ? `${sinceHours}h` : `${differenceInMinutes(new Date(), new Date(alert.pubMillis))}min`;
-          return `${alert.street.substring(0,8)} vor ${since} (${alert.confidence})`;
+          const streetMatch = alert.street.match(/(A\d+)/);
+          return `${streetMatch[0]} vor ${since} (${alert.confidence})`;
         });
-        return strings.join(', ');
+      }
+    });
+}
+
+export function blitzerDeAlert(lat: number, lng: number): Promise<string[]> {
+  const DELTA = 0.01;
+  // type 1 = Mobiler Blitzer/Teilstationärer Blitzer, 107 = Fester Blitzer, 110 = Fester Blitzer für Rotlicht und Geschwindigkeit, 111 = Fester Blitzer
+  const url = `https://cdn3.atudo.net/api/4.0/pois.php\
+?type=101,102,103,104,105,106,107,108,109,110,111,112,113,115,114,ts,0,1,2,3,4,5,6\
+&z=10\
+&box=${lat - DELTA},${lng - DELTA},${lat + DELTA},${lng + DELTA}
+`;
+
+  return axios.get<BlitzerDeResponse>(url)
+    .then((res) => {
+      log('BLITZER.DE');
+      res.data.pois?.forEach((poi) => {
+        log(`typ: ${poi.type}, vmax: ${poi.vmax}, since: ${poi.create_date}, confirmed: ${poi.info?.confirmed}}`);
+      });
+      return res;
+    })
+    .then((res) => {
+      if (res.data.pois && res.data.pois.length > 0) {
+        return res.data.pois.map((poi) => {
+          const createDate = parseDate(poi.create_date);
+          const confirmDate = parseDate(poi.confirm_date);
+          let since;
+          let lastConfirmed;
+          if (poi.type === '1') { // Mobiler Blitzer/Teilstationärer Blitzer
+            const sinceDays = differenceInDays(new Date(), createDate);
+            const sinceHours = differenceInHours(new Date(), createDate);
+            since = sinceDays >= 1
+              ? `${sinceDays}d`
+              : sinceHours >= 1
+              ? `${sinceHours}h`
+              : `${differenceInMinutes(new Date(), createDate)}min`;
+            const lastConfirmedHours = differenceInHours(new Date(), confirmDate);
+            lastConfirmed = lastConfirmedHours >= 1 ? `${lastConfirmedHours}h` : `${differenceInMinutes(new Date(), confirmDate)}min`;
+          } else {
+            since = undefined;
+            lastConfirmed = undefined;
+          }
+          return `${poi.vmax}km/h${!!since ? ', ' + since : ''}${!!lastConfirmed ? ', best. vor ' + lastConfirmed : ''}`;
+        });
       }
     });
 }
@@ -237,4 +297,16 @@ ${toLng}\
 
 function toDuration(seconds: number): string {
   return new Date(seconds * 1000).toISOString().substring(11, 16);
+}
+
+function parseDate(value: string): Date {
+  const timeMatch = value.match(/^(\d{2}:\d{2})$/);
+  const dayMatch = value.match(/^(\d{2}.\d{2}.\d{4})$/);
+  if (!!timeMatch) {
+    return parse(timeMatch[0], 'H:mm', new Date());
+  } else if (!!dayMatch) {
+    return parse(dayMatch[0], 'dd.M.yyyy', new Date())
+  } else {
+    log(`Mooep!`);
+  }
 }

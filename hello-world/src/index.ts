@@ -2,7 +2,7 @@ import * as express from 'express';
 import { crawl } from './crawler';
 import { log } from './util';
 import * as path from 'path';
-import { googleMaps, tomtom, waze, wazeAlert } from './api';
+import { blitzerDeAlert, googleMaps, tomtom, waze, wazeAlert } from './api';
 
 const app = express();
 const port = 8000;
@@ -27,14 +27,14 @@ app.get('/api', async (req, res) => {
   }
 
   try {
-    switch (process.env.TRAFFIC_PROVIDER) {
-      case 'WAZE':
-        console.log('choosing WAZE');
-      case 'TomTom':
-        console.log('choosing TomTom');
-      case 'Google Maps':
-        console.log('choosing Google Maps');
+    if (process.env.TRAFFIC_PROVIDER === 'WAZE') {
+      log('choosing WAZE');
+    } else if (process.env.TRAFFIC_PROVIDER === 'TomTom') {
+      log('choosing TomTom');
+    } else if (process.env.TRAFFIC_PROVIDER === 'Google Maps') {
+      log('choosing Google Maps');
     }
+
     googleMaps(fromLat, fromLng, toLat, toLng).then((result) => log(`Google Maps Result: ${JSON.stringify(result)}`));
     waze(fromLat, fromLng, toLat, toLng).then((result) => log(`Waze Result: ${JSON.stringify(result)}`));
     tomtom(fromLat, fromLng, toLat, toLng).then((result) => {
@@ -66,6 +66,9 @@ app.get('/alerts', async (req, res) => {
   try {
     wazeAlert(lat, lng).then((result) => {
       log(`WazeAlert Result: ${JSON.stringify(result)}`);
+    });
+    blitzerDeAlert(lat, lng).then((result) => {
+      log(`Blitzer.de Result: ${JSON.stringify(result)}`);
       res.json(result);
     });
   } catch (e) {

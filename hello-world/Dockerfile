@@ -4,7 +4,6 @@ FROM $BUILD_FROM
 # Install requirements for add-on
 RUN \
   apk add --no-cache --update \
-    chromium \
     nodejs \
     npm
 
