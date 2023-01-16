@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { log } from './util';
 import { add, differenceInDays, differenceInHours, differenceInMinutes, format, parse } from 'date-fns';
+import { getDistanceBetweenTwoPoints } from 'calculate-distance-between-coordinates';
 
 interface CommutingInfo {
   minutes: number;
@@ -168,7 +169,7 @@ export function wazeAlert(lat: number, lng: number): Promise<string[]> {
     .then((res) => {
       log('WAZE ALERTS');
       res.data.alerts?.filter((alert) => alert.type === 'POLICE' || alert.type === 'HAZARD').forEach((alert) => {
-        log(`typ: ${alert.type}, street: ${alert.street}, since: ${format(new Date(alert.pubMillis), 'dd.MM. HH:mm')}, confidence: ${alert.confidence}, thumbsUp: ${alert.nThumbsUp}, description: ${alert.reportDescription}`);
+        log(`typ: ${alert.type}, street: ${alert.street}, ${getDistanceBetweenTwoPoints({ lat, lon: lng }, { lat: alert.location.y, lon: alert.location.x }).toFixed(1)}km, since: ${format(new Date(alert.pubMillis), 'dd.MM. HH:mm')}, confidence: ${alert.confidence}, thumbsUp: ${alert.nThumbsUp}, description: ${alert.reportDescription}`);
       });
       return res;
     })
@@ -176,7 +177,7 @@ export function wazeAlert(lat: number, lng: number): Promise<string[]> {
       if (res.data.alerts && res.data.alerts.length > 0) {
         const policeAlerts = res.data.alerts
           .filter((alert) => alert.type === 'POLICE')
-          .filter((alert) => !!alert.street.match(/(A\d+)/))
+          .filter((alert) => !!alert.street?.match(/(A\d+)/))
           .filter((alert) => differenceInHours(new Date(), new Date(alert.pubMillis)) <= 12)
         ;
         return policeAlerts.map((alert) => {
@@ -189,7 +190,7 @@ export function wazeAlert(lat: number, lng: number): Promise<string[]> {
     });
 }
 
-export function blitzerDeAlert(lat: number, lng: number): Promise<string[]> {
+export function blitzerDeAlert(lat: number, lng: number): Promise<{ distance, vmax, since, lastConfirmed }> {
   const DELTA = 0.01;
   // type 1 = Mobiler Blitzer/Teilstationärer Blitzer, 107 = Fester Blitzer, 110 = Fester Blitzer für Rotlicht und Geschwindigkeit, 111 = Fester Blitzer
   const url = `https://cdn3.atudo.net/api/4.0/pois.php\
@@ -202,7 +203,7 @@ export function blitzerDeAlert(lat: number, lng: number): Promise<string[]> {
     .then((res) => {
       log('BLITZER.DE');
       res.data.pois?.forEach((poi) => {
-        log(`typ: ${poi.type}, vmax: ${poi.vmax}, since: ${poi.create_date}, confirmed: ${poi.info?.confirmed}}`);
+        log(`typ: ${poi.type}, vmax: ${poi.vmax}, ${getDistanceBetweenTwoPoints({ lat, lon: lng }, { lat: +poi.lat, lon: +poi.lng }).toFixed(1)}km, since: ${poi.create_date}, confirmed: ${poi.info?.confirmed}}`);
       });
       return res;
     })
@@ -227,9 +228,22 @@ export function blitzerDeAlert(lat: number, lng: number): Promise<string[]> {
             since = undefined;
             lastConfirmed = undefined;
           }
-          return `${poi.vmax}km/h${!!since ? ', ' + since : ''}${!!lastConfirmed ? ', best. vor ' + lastConfirmed : ''}`;
+          return {
+            distance: getDistanceBetweenTwoPoints({ lat, lon: lng }, { lat: +poi.lat, lon: +poi.lng }),
+            vmax: poi.vmax,
+            since,
+            lastConfirmed,
+          };
         });
       }
+    })
+    .then((list) => {
+      if (!list || !list.length) {
+        return null;
+      }
+      const minDistance = Math.min(...list.filter((item) => !!item.distance).map((item) => item.distance));
+      const minItem = list.find((item) => item.distance === minDistance);
+      return { ...minItem, distance: +minItem.distance.toFixed(1) };
     });
 }
 
